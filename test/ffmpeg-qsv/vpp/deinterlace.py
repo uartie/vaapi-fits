@@ -17,6 +17,10 @@ class DeinterlaceTest(slash.Test):
     "advanced",
   ]
 
+  _default_modes_ = [
+    dict(method = m, rate = "frame") for m in _default_methods_
+  ]
+
   def before(self):
     # default metric
     self.metric = dict(type = "md5")
@@ -106,4 +110,52 @@ class raw(DeinterlaceTest):
     vars(self).setdefault("r2r", 5)
     vars(self).update(spec_raw_r2r[case].copy())
     vars(self).update(case = case, method = method)
+    self.deinterlace()
+
+spec_avc = load_test_spec("vpp", "deinterlace", "avc")
+class avc(DeinterlaceTest):
+  def before(self):
+    self.ffdecoder = "-c:v h264_qsv"
+    super(avc, self).before()
+
+  @platform_tags(set(AVC_DECODE_PLATFORMS) & set(VPP_PLATFORMS))
+  @slash.requires(*have_ffmpeg_decoder("h264_qsv"))
+  @slash.parametrize(
+    *gen_vpp_deinterlace_parameters2(
+      spec_avc, DeinterlaceTest._default_modes_))
+  def test(self, case, method, rate):
+    vars(self).update(spec_avc[case].copy())
+    vars(self).update(case = case, method = method, rate = rate)
+    self.deinterlace()
+
+spec_mpeg2 = load_test_spec("vpp", "deinterlace", "mpeg2")
+class mpeg2(DeinterlaceTest):
+  def before(self):
+    self.ffdecoder = "-c:v mpeg2_qsv"
+    super(mpeg2, self).before()
+
+  @platform_tags(set(MPEG2_DECODE_PLATFORMS) & set(VPP_PLATFORMS))
+  @slash.requires(*have_ffmpeg_decoder("mpeg2_qsv"))
+  @slash.parametrize(
+    *gen_vpp_deinterlace_parameters2(
+      spec_mpeg2, DeinterlaceTest._default_modes_))
+  def test(self, case, method, rate):
+    vars(self).update(spec_mpeg2[case].copy())
+    vars(self).update(case = case, method = method, rate = rate)
+    self.deinterlace()
+
+spec_vc1 = load_test_spec("vpp", "deinterlace", "vc1")
+class vc1(DeinterlaceTest):
+  def before(self):
+    self.ffdecoder = "-c:v vc1_qsv"
+    super(vc1, self).before()
+
+  @platform_tags(set(VC1_DECODE_PLATFORMS) & set(VPP_PLATFORMS))
+  @slash.requires(*have_ffmpeg_decoder("vc1_qsv"))
+  @slash.parametrize(
+    *gen_vpp_deinterlace_parameters2(
+      spec_vc1, DeinterlaceTest._default_modes_))
+  def test(self, case, method, rate):
+    vars(self).update(spec_vc1[case].copy())
+    vars(self).update(case = case, method = method, rate = rate)
     self.deinterlace()

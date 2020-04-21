@@ -1,0 +1,20 @@
+###
+### Copyright (C) 2020 Intel Corporation
+###
+### SPDX-License-Identifier: BSD-3-Clause
+###
+
+import fnmatch
+
+assets = os.environ.get("ITU_T_ASSETS", None)
+assert assets is not None, "ERROR: ITU_T_ASSETS not set"
+assert os.path.exists(assets), "ERROR: ITU_T_ASSETS invalid"
+
+for file in os.listdir(os.path.dirname(config)):
+  if fnmatch.fnmatch(file, "*.conformance"):
+    with open(os.path.join(os.path.dirname(config), file), 'rb') as f:
+      exec(f.read())
+
+###
+### kate: syntax python;
+###

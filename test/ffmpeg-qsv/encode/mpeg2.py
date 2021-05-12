@@ -11,6 +11,9 @@ from ....lib.ffmpeg.qsv.encoder import EncoderTest
 spec      = load_test_spec("mpeg2", "encode")
 spec_r2r  = load_test_spec("mpeg2", "encode", "r2r")
 
+@slash.requires(*platform.have_caps("encode", "mpeg2"))
+@slash.requires(*have_ffmpeg_encoder("mpeg2_qsv"))
+@slash.requires(*have_ffmpeg_decoder("mpeg2_qsv"))
 class MPEG2EncoderTest(EncoderTest):
   def before(self):
     vars(self).update(
@@ -37,17 +40,11 @@ class cqp(MPEG2EncoderTest):
       rcmode  = "cqp",
     )
 
-  @slash.requires(*platform.have_caps("encode", "mpeg2"))
-  @slash.requires(*have_ffmpeg_encoder("mpeg2_qsv"))
-  @slash.requires(*have_ffmpeg_decoder("mpeg2_qsv"))
   @slash.parametrize(*gen_mpeg2_cqp_parameters(spec))
   def test(self, case, gop, bframes, qp, quality):
     self.init(spec, case, gop, bframes, qp, quality)
     self.encode()
 
-  @slash.requires(*platform.have_caps("encode", "mpeg2"))
-  @slash.requires(*have_ffmpeg_encoder("mpeg2_qsv"))
-  @slash.requires(*have_ffmpeg_decoder("mpeg2_qsv"))
   @slash.parametrize(*gen_mpeg2_cqp_parameters(spec_r2r))
   def test_r2r(self, case, gop, bframes, qp, quality):
     self.init(spec_r2r, case, gop, bframes, qp, quality)

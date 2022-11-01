@@ -54,8 +54,9 @@ class Decoder(PropertyHandler, BaseFormatMapper):
 
   @property
   def ffoutput(self):
-    if self.props.get("metric", dict()).get("type", None) == "md5":
-      return f"-f tee '{self.osdecoded}|[f=md5]pipe:1'"
+    if get_media().inline_metrics:
+      if self.props.get("metric", dict()).get("type", None) == "md5":
+        return f"-f tee '{self.osdecoded}|[f=md5]pipe:1'"
     return f"{self.osdecoded}"
 
   @timefn("ffmpeg:decode")
@@ -64,23 +65,24 @@ class Decoder(PropertyHandler, BaseFormatMapper):
       get_media()._purge_test_artifact(self._decoded)
     self._decoded = get_media()._test_artifact2("yuv")
 
-    mtype = self.props.get("metric", dict()).get("type", None)
-    if mtype in ["ssim", "psnr"]:
-      fps = ffmpeg_probe_fps(self.ossource)
+    if get_media().inline_metrics:
+      mtype = self.props.get("metric", dict()).get("type", None)
+      if mtype in ["ssim", "psnr"]:
+        fps = ffmpeg_probe_fps(self.ossource)
 
-      if vars(self).get("_statsfile", None) is not None:
-        get_media()._purge_test_artifact(self._statsfile)
-      self._statsfile = get_media()._test_artifact2(mtype)
+        if vars(self).get("_statsfile", None) is not None:
+          get_media()._purge_test_artifact(self._statsfile)
+        self._statsfile = get_media()._test_artifact2(mtype)
 
-      return call(
-        f"{exe2os('ffmpeg')} -v verbose {self.hwinit}"
-        f" {self.ffdecoder} -r:v {fps} -i {self.ossource}"
-        f" -f rawvideo -pix_fmt {self.format} -s:v {self.width}x{self.height}"
-        f" -r:v {fps} -i {self.osreference}"
-        f" -lavfi \"{self.scale_range},{mtype}=f=\\'{self.osstatsfile}\\':shortest=1\""
-        f" -c:v rawvideo -pix_fmt {self.format} -fps_mode passthrough"
-        f" -autoscale 0 -vframes {self.frames} -y {self.ffoutput}"
-      )
+        return call(
+          f"{exe2os('ffmpeg')} -v verbose {self.hwinit}"
+          f" {self.ffdecoder} -r:v {fps} -i {self.ossource}"
+          f" -f rawvideo -pix_fmt {self.format} -s:v {self.width}x{self.height}"
+          f" -r:v {fps} -i {self.osreference}"
+          f" -lavfi \"{self.scale_range},{mtype}=f=\\'{self.osstatsfile}\\':shortest=1\""
+          f" -c:v rawvideo -pix_fmt {self.format} -fps_mode passthrough"
+          f" -autoscale 0 -vframes {self.frames} -y {self.ffoutput}"
+        )
 
     return call(
       f"{exe2os('ffmpeg')} -v verbose {self.hwinit}"
@@ -121,12 +123,20 @@ class BaseDecoderTest(slash.Test, BaseFormatMapper):
     self.decoder.update(metric = self.metric)
 
     metric = metrics2.factory.create(**vars(self))
-    metric.actual = parse_inline_md5(self.decoder.decode())
+
+    output = self.decoder.decode()
+    metric.update(filetest = self.decoder.decoded)
+    if get_media().inline_metrics:
+      metric.actual = parse_inline_md5(output)
+
     metric.expect = metric.actual # the first run is our reference for r2r
     metric.check()
 
     for i in range(1, self.r2r):
-      metric.actual = parse_inline_md5(self.decoder.decode())
+      output = self.decoder.decode()
+      metric.update(filetest = self.decoder.decoded)
+      if get_media().inline_metrics:
+        metric.actual = parse_inline_md5(output)
       metric.check()
 
   def decode(self):
@@ -151,11 +161,12 @@ class BaseDecoderTest(slash.Test, BaseFormatMapper):
     metric = metrics2.factory.create(**vars(self))
     metric.update(filetest = self.decoder.decoded)
 
-    if metric.__class__ is metrics2.md5.MD5:
-      metric.actual = parse_inline_md5(self.output)
-    elif metric.__class__ is metrics2.ssim.SSIM:
-      metric.actual = parse_ssim_stats(self.decoder.statsfile, self.frames)
-    elif metric.__class__ is metrics2.ssim.PSNR:
-      metric.actual = parse_psnr_stats(self.decoder.statsfile, self.frames)
+    if get_media().inline_metrics:
+      if metric.__class__ is metrics2.md5.MD5:
+        metric.actual = parse_inline_md5(self.output)
+      elif metric.__class__ is metrics2.ssim.SSIM:
+        metric.actual = parse_ssim_stats(self.decoder.statsfile, self.frames)
+      elif metric.__class__ is metrics2.ssim.PSNR:
+        metric.actual = parse_psnr_stats(self.decoder.statsfile, self.frames)
 
     metric.check()

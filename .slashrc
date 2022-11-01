@@ -87,6 +87,7 @@ class MediaPlugin(slash.plugins.PluginInterface):
     parser.add_argument("--ctapr", default = -1, type = int,
       help = "number of call timeouts allowed per run")
     parser.add_argument("--parallel-metrics", action = "store_true")
+    parser.add_argument("--noinline-metrics", action = "store_true")
     parser.add_argument("--platform", default = None, type = str, required = True)
     parser.add_argument("--device", default = '/dev/dri/renderD128', type = str, help = 'vaapi-fits run with render device')
 
@@ -95,6 +96,7 @@ class MediaPlugin(slash.plugins.PluginInterface):
     self.retention = args.artifact_retention
     self.call_timeout = args.call_timeout
     self.parallel_metrics = args.parallel_metrics
+    self.inline_metrics = not args.noinline_metrics
     self.ctapt = args.ctapt
     self.ctapr = args.ctapr
     self.platform = args.platform
@@ -302,6 +304,8 @@ class MediaPlugin(slash.plugins.PluginInterface):
       handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
       self.metrics_pool = multiprocessing.Pool()
       signal.signal(signal.SIGINT, handler)
+
+    slash.logger.notice(f"Using device '{self.render_device}' on platform '{self.platform}'")
 
   def session_end(self):
     if self.metrics_pool is not None:

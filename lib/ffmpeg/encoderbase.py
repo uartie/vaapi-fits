@@ -109,8 +109,9 @@ class Encoder(PropertyHandler, BaseFormatMapper):
 
   @property
   def ffoutput(self):
-    if self.props.get("metric", dict()).get("type", None) == "md5":
-      return f"-f tee -map 0:v '{self.osencoded}|[f=md5]pipe:1'"
+    if get_media().inline_metrics:
+      if self.props.get("metric", dict()).get("type", None) == "md5":
+        return f"-f tee -map 0:v '{self.osencoded}|[f=md5]pipe:1'"
     return f"{self.osencoded}"
 
   @timefn("ffmpeg:encode")
@@ -197,16 +198,22 @@ class BaseEncoderTest(slash.Test, BaseFormatMapper):
   def _encode_r2r(self):
     assert type(self.r2r) is int and self.r2r > 1, "invalid r2r value"
 
-    vars(self).update(metric = dict(type = "md5"))
+    vars(self).update(metric = dict(type = "md5", numbytes = -1))
     self.encoder.update(metric = self.metric)
 
     metric = metrics2.factory.create(**vars(self))
-    metric.actual = parse_inline_md5(self.encoder.encode())
+    output = self.encoder.encode()
+    metric.update(filetest = self.encoder.encoded)
+    if get_media().inline_metrics:
+      metric.actual = parse_inline_md5(output)
     metric.expect = metric.actual # the first run is our reference for r2r
     metric.check()
 
     for i in range(1, self.r2r):
-      metric.actual = parse_inline_md5(self.encoder.encode())
+      output = self.encoder.encode()
+      metric.update(filetest = self.encoder.encoded)
+      if get_media().inline_metrics:
+        metric.actual = parse_inline_md5(output)
       metric.check()
 
   def encode(self):
@@ -253,7 +260,10 @@ class BaseEncoderTest(slash.Test, BaseFormatMapper):
     self.decoder.decode()
 
     metric = metrics2.factory.create(**vars(self))
-    metric.actual = parse_psnr_stats(self.decoder.statsfile, self.frames)
+    metric.update(filetrue = self.source, filetest = self.decoder.decoded)
+
+    if get_media().inline_metrics:
+      metric.actual = parse_psnr_stats(self.decoder.statsfile, self.frames)
 
     metric.check()
 

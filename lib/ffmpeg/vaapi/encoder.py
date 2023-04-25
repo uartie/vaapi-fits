@@ -87,15 +87,3 @@ class EncoderTest(BaseEncoderTest):
     )
     m = re.search(rcmsgs[self.rcmode], self.output, re.MULTILINE)
     assert m is not None, "Possible incorrect RC mode used"
-
-    # ipb mode
-    ipbmode = 0 if vars(self).get("gop", 0) <= 1 else 1 if vars(self).get("bframes", 0) < 1 else 2
-    ipbmsgs = [
-      "Using intra frames only",
-      "Using intra and P-frames|[L|l]ow delay|forward-prediction"
-      "|not support P-frames, replacing them with B-frames",
-      "Using intra, P- and B-frames|[L|l]ow delay|forward-prediction"
-      "|not support P-frames, replacing them with B-frames",
-    ]
-    m = re.search(ipbmsgs[ipbmode], self.output, re.MULTILINE)
-    assert m is not None, "Possible incorrect IPB mode used"

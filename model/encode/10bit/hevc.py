@@ -7,11 +7,12 @@
 import os
 import slash
 
+from ....lib.codecs import Codec
 from ....lib.ffmpeg.qsv.util import *
 from ....lib.ffmpeg.qsv.encoder import HEVC10EncoderTest
 from ..util import TrendModelMixin
 
-spec = load_test_spec("hevc", "encode", "10bit")
+spec = load_test_spec(Codec.HEVC, "encode", "10bit")
 
 class trend(HEVC10EncoderTest, TrendModelMixin):
   #MRO overrides

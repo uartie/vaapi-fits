@@ -7,11 +7,12 @@
 import os
 import slash
 
+from ...lib.codecs import Codec
 from ...lib.ffmpeg.qsv.util import *
 from ...lib.ffmpeg.qsv.encoder import MPEG2EncoderTest
 from .util import TrendModelMixin
 
-spec = load_test_spec("mpeg2", "encode")
+spec = load_test_spec(Codec.MPEG2, "encode")
 
 class trend(MPEG2EncoderTest, TrendModelMixin):
   # MRO overrides

@@ -7,11 +7,12 @@
 import os
 import slash
 
+from ....lib.codecs import Codec
 from ....lib.ffmpeg.qsv.util import *
 from ....lib.ffmpeg.qsv.encoder import VP9_10EncoderLPTest
 from ..util import TrendModelMixin
 
-spec = load_test_spec("vp9", "encode", "10bit")
+spec = load_test_spec(Codec.VP9, "encode", "10bit")
 
 class trend(VP9_10EncoderLPTest, TrendModelMixin):
   #MRO overrides

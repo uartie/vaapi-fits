@@ -7,11 +7,12 @@
 import os
 import slash
 
+from ...lib.codecs import Codec
 from ...lib.ffmpeg.vaapi.util import *
 from ...lib.ffmpeg.vaapi.encoder import VP8EncoderTest
 from .util import TrendModelMixin
 
-spec = load_test_spec("vp8", "encode")
+spec = load_test_spec(Codec.VP8, "encode")
 
 class trend(VP8EncoderTest, TrendModelMixin):
   #MRO overrides

@@ -7,11 +7,12 @@
 import os
 import slash
 
+from ...lib.codecs import Codec
 from ...lib.ffmpeg.qsv.util import *
 from ...lib.ffmpeg.qsv.encoder import AV1EncoderLPTest
 from .util import TrendModelMixin
 
-spec = load_test_spec("av1", "encode", "8bit")
+spec = load_test_spec(Codec.AV1, "encode", "8bit")
 
 class trend(AV1EncoderLPTest, TrendModelMixin):
   #MRO overrides

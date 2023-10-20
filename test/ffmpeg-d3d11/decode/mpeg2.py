@@ -5,11 +5,12 @@
 ###
 
 from ....lib import *
+from ....lib.codecs import Codec
 from ....lib.ffmpeg.d3d11.util import *
 from ....lib.ffmpeg.d3d11.decoder import DecoderTest
 
-spec = load_test_spec("mpeg2", "decode")
-spec_r2r = load_test_spec("mpeg2", "decode", "r2r")
+spec = load_test_spec(Codec.MPEG2, "decode")
+spec_r2r = load_test_spec(Codec.MPEG2, "decode", "r2r")
 
 @slash.requires(*platform.have_caps("decode", "mpeg2"))
 class default(DecoderTest):

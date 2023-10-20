@@ -5,10 +5,11 @@
 ###
 
 from .....lib import *
+from .....lib.codecs import Codec
 from .....lib.ffmpeg.d3d11.util import *
 from .....lib.ffmpeg.d3d11.decoder import DecoderTest
 
-spec = load_test_spec("av1", "decode", "10bit")
+spec = load_test_spec(Codec.AV1, "decode", "10bit")
 
 @slash.requires(*platform.have_caps("decode", "av1_10"))
 class default(DecoderTest):

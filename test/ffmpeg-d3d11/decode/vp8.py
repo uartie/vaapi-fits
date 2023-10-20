@@ -5,10 +5,11 @@
 ###
 
 from ....lib import *
+from ....lib.codecs import Codec
 from ....lib.ffmpeg.d3d11.util import *
 from ....lib.ffmpeg.d3d11.decoder import DecoderTest
 
-spec = load_test_spec("vp8", "decode")
+spec = load_test_spec(Codec.VP8, "decode")
 
 @slash.requires(*platform.have_caps("decode", "vp8"))
 class default(DecoderTest):

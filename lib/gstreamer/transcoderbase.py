@@ -118,8 +118,9 @@ class BaseTranscoderTest(slash.Test, BaseFormatMapper):
       opts += " ! tsdemux"
     opts += " ! " + self.get_decoder(self.codec, self.mode)
     if self.mode in ["hw", "sw"]:
-      fps = int(gst_discover_fps(self.source)) or 30
-      opts += f" ! videorate ! video/x-raw,format={self.mformat},framerate={fps}/1"
+      fps = gst_discover_fps(self.ossource)
+      fps = "30/1" if fps.startswith("0") else fps
+      opts += f" ! videorate ! video/x-raw,format={self.mformat},framerate={fps}"
     return opts.format(**vars(self))
 
   def gen_output_opts(self):

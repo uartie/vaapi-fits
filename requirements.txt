@@ -4,4 +4,4 @@ scikit-image == 0.24.0
 distro == 1.9.0
 psutil == 6.0.0
 py-cpuinfo == 9.0.0
-matplotlib == 3.9.0
+matplotlib == 3.9.2

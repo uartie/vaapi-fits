@@ -1,0 +1,22 @@
+---
+name: Repository Dispatch
+
+on:
+  pull_request:
+
+jobs:
+  send-event:
+    environment: devops_dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DEVOPS_DISPATCH_TOKEN }}
+          repository: ${{ secrets.DEVOPS_DISPATCH_REPO }}
+          event-type: oh-pr-dispatch
+          client-payload: |-
+            {
+              "ref": "${{ github.ref }}",
+              "sha": "${{ github.sha }}"
+            }

@@ -1,3 +1,5 @@
+DISPATCH TEST
+
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/21422/badge.svg)](https://scan.coverity.com/projects/intel-vaapi-fits)
 
 # VA-API Functional Integration Test Suite
